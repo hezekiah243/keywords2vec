@@ -3,3 +3,5 @@ server/models
 *.tsv.gz
 server/public/index.js
 Untitled Folder/
+*.egg-info/
+*.pyc

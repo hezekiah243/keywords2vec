@@ -13,6 +13,10 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from fastprogress.fastprogress import progress_bar
 
 
+
+#tokenize_text(path=,text=,output="",lang=,sample_size=,lines_chunks=)
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument(
@@ -65,6 +69,12 @@ def main():
         required=False,
         help="Word2vec vector size",
         metavar="WORD2VEC_SIZE", default="300", type=int
+    )
+    parser.add_argument(
+        "--lang", dest="lang",
+        required=False,
+        help="Language",
+        metavar="lang", default="en", type=str
     )
     parser.add_argument(
         "--word2vec_window", dest="word2vec_window",
@@ -162,6 +172,7 @@ def num_cpus():
 
 
 def tokenize_chunk(text, index):
+    #TODO: send lang parameter
     return tokenize(text, text_output=True)
 
 
@@ -180,7 +191,7 @@ def tokenize_text(args):
         tokenized_path = os.path.join(args.experiment_path, "tokenized.txt.gz")
     else:
         tokenized_path = args.tokenized_path
-
+    os.environ["TOKENIZER_LANG"] = args.lang
     index = 0
     with gzip.open(tokenized_path, "wt") as _output:
         for file_path in glob(args.input_filename):
@@ -189,6 +200,11 @@ def tokenize_text(args):
             new_index, text_chunks, break_by_sample = get_file_chunks(index, file_path, args.lines_chunks, args)
             index = new_index
             results = parallel(tokenize_chunk, text_chunks, args.workers)
+            # results = []
+            # for text_chunk in text_chunks:
+            #     text_ = tokenize_chunk(text_chunk, 0)
+            #     results.append(text_)
+
             _output.write("\n".join(results) + "\n")
             if break_by_sample:
                 break
