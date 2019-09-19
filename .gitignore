@@ -5,3 +5,7 @@ server/public/index.js
 Untitled Folder/
 *.egg-info/
 *.pyc
+*.txt.gz
+/build
+/dist
+/tmp

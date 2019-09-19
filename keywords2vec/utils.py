@@ -6,9 +6,11 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
 # BEGIN From fastai
-def parallel(func, arr, max_workers=None):
+def parallel(func, arr, max_workers=-1):
+    if max_workers == -1:
+        max_workers = num_cpus(2)
     with ProcessPoolExecutor(max_workers=max_workers) as ex:
-        futures = [ex.submit(func, o, i) for i, o in enumerate(arr)]
+        futures = [ex.submit(func, arr_el) for arr_el in arr]
         results = []
         for f in progress_bar(as_completed(futures), total=len(arr)):
             results.append(f.result())
@@ -22,8 +24,10 @@ def open_file(filepath, options):
     return open(filepath, options)
 
 
-def chunk_of_text(_file, chunk_size):
+def chunk_of_text(_file, chunk_size=-1):
     index = 0
+    if chunk_size == -1:
+        chunk_size = 200
     while True:
         line = _file.readline()
         if not line:

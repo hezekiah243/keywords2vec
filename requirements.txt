@@ -1,6 +1,4 @@
-gensim
-pandas
-Flask
 nltk
 unidecode
 fastprogress
+git+git://github.com/facebookresearch/fastText.git

@@ -14,7 +14,7 @@ requires = [
 setuptools.setup(
     name='keywords2vec',
     version='0.1',
-    # scripts=['keywords2vec'],
+    scripts=['bin/k2vec'],
     author="Daniel Pérez Rada",
     author_email="dperezrada@gmail.com",
     description="Similar to word2vec, but with keywords",
