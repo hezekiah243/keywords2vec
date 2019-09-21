@@ -64,6 +64,15 @@ But as there were some problem with some keywords that cointain stopwords, like:
 
 So we decided to add another method (nltk with some grammar definition) to cover most of the cases.
 
+## Install
+
+Inside python, execute
+
+```
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+```
 
 ### References
 
@@ -190,3 +199,5 @@ You can start a server to play around with the data:
 ```
 FLASK_APP=server/server.py VECTORS_PATH=/tmp/example/ flask run
 ```
+
+

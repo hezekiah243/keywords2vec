@@ -12,11 +12,8 @@ from keywords2vec.utils import parallel, open_file, chunk_of_text
 from keywords2vec.tokenizer import tokenize
 
 
-# import gensim
-
-
 def tokenize_file(
-    input_path, output_path="tokenized.tx", lang="en",
+    input_path, output_path="tokenized.txt", lang="en",
     sample_size=-1, lines_chunks=-1, n_cpus=-1
 ):
     tokenize_wrapper = partial(tokenize, lang=lang, text_output=True)
