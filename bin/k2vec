@@ -4,6 +4,10 @@ import sys
 
 from argparse import ArgumentParser
 
+from tornado.wsgi import WSGIContainer
+from tornado.httpserver import HTTPServer
+from tornado.ioloop import IOLoop
+
 from keywords2vec import tokenize_file, train_model
 from keywords2vec.server import prepare_server
 
@@ -99,7 +103,9 @@ def main():
 
     if args.subcommand == "serve":
         app = prepare_server(args.model_path, args.index_path)
-        app.run()
+        http_server = HTTPServer(WSGIContainer(app))
+        http_server.listen(5000)
+        IOLoop.instance().start()
     elif args.subcommand == "train":
         if not os.path.exists(args.output_directory):
             os.makedirs(args.output_directory)
