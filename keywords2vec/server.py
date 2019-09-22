@@ -3,10 +3,13 @@ import sys
 from collections import defaultdict
 
 import fasttext
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+from whoosh.index import open_dir
+from whoosh.qparser import QueryParser
 
 
 model = None
+ix = None
 
 app = Flask(__name__)
 x_suggestions_per_keyword = 100
@@ -15,7 +18,7 @@ x_max_suggestions = 500
 def prepare_input_keywords():
     raw_keywords = (request.args.get('k') or "").split(",")
     return [
-        keyword.replace(" ", "_").lower()
+        keyword.strip().replace(" ", "_").lower()
         for keyword in raw_keywords
     ]
 
@@ -26,7 +29,7 @@ def prepare_output_keywords(score_keywords):
     ]
 
 
-@app.route('/keywords/suggestions')
+@app.route('/keywords/similars')
 def get_suggestion():
     all_suggestions = defaultdict(lambda: defaultdict(float))
     keywords = prepare_input_keywords()
@@ -43,8 +46,28 @@ def get_suggestion():
         )[0:x_max_suggestions]
     )
 
-def load_model(model_path):
+def load_index():
+    ix = open_dir("indexdir", readonly=True)
+    return ix
+
+@app.route('/keywords/autocomplete')
+def get_keywords_autocomplete():
+    top_n = 25
+    keyword = prepare_input_keywords()[0]
+    with ix.searcher() as searcher:
+        query = QueryParser("label", ix.schema).parse(keyword)
+        results = searcher.search(query, limit=top_n, sortedby="pos")
+        return jsonify([result.get("label").replace("_", " ") for result in results])
+
+@app.route('/')
+def home():
+    return send_from_directory('.', "index.html")
+
+def prepare_server(model_path):
     global model
     global app
+    global ix
+    ix = load_index()
     model = fasttext.load_model(model_path)
     return app
+
