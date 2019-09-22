@@ -46,8 +46,8 @@ def get_suggestion():
         )[0:x_max_suggestions]
     )
 
-def load_index():
-    ix = open_dir("indexdir", readonly=True)
+def load_index(index_path):
+    ix = open_dir(index_path, readonly=True)
     return ix
 
 @app.route('/keywords/autocomplete')
@@ -63,11 +63,11 @@ def get_keywords_autocomplete():
 def home():
     return send_from_directory('.', "index.html")
 
-def prepare_server(model_path):
+def prepare_server(model_path, index_path):
     global model
     global app
     global ix
-    ix = load_index()
+    ix = load_index(index_path)
     model = fasttext.load_model(model_path)
     return app
 
