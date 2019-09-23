@@ -89,11 +89,6 @@ def main():
         required=True,
         help="The path to the model"
     )
-    parser_serve.add_argument(
-        "--index-path", dest="index_path",
-        required=True,
-        help="The path to the indexed"
-    )
 
     try:
         args = parser.parse_args()
@@ -102,7 +97,7 @@ def main():
         return
 
     if args.subcommand == "serve":
-        app = prepare_server(args.model_path, args.index_path)
+        app = prepare_server(args.model_path)
         http_server = HTTPServer(WSGIContainer(app))
         http_server.listen(5000)
         IOLoop.instance().start()

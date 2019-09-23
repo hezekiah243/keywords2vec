@@ -2,5 +2,5 @@ nltk
 unidecode
 fastprogress
 git+git://github.com/facebookresearch/fastText.git
-whoosh
 tornado
+flask-cors

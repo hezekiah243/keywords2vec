@@ -4,16 +4,17 @@ from collections import defaultdict
 
 import fasttext
 from flask import Flask, request, jsonify, send_from_directory
-from whoosh.index import open_dir
-from whoosh.qparser import QueryParser
+from flask_cors import CORS
 
 
 model = None
-ix = None
 
 app = Flask(__name__)
+CORS(app)
 x_suggestions_per_keyword = 100
 x_max_suggestions = 500
+
+all_keywords = []
 
 def prepare_input_keywords():
     raw_keywords = (request.args.get('k') or "").split(",")
@@ -46,28 +47,36 @@ def get_suggestion():
         )[0:x_max_suggestions]
     )
 
-def load_index(index_path):
-    ix = open_dir(index_path, readonly=True)
-    return ix
 
 @app.route('/keywords/autocomplete')
-def get_keywords_autocomplete():
+def get_keywords_autocomplete2():
     top_n = 25
     keyword = prepare_input_keywords()[0]
-    with ix.searcher() as searcher:
-        query = QueryParser("label", ix.schema).parse(keyword)
-        results = searcher.search(query, limit=top_n, sortedby="pos")
-        return jsonify([result.get("label").replace("_", " ") for result in results])
+    found = 0
+    found_keywords = []
+    for index, keyword_in_all in enumerate(all_keywords):
+        if keyword in keyword_in_all:
+            found += 1
+            found_keywords.append(keyword_in_all.replace("_", " "))
+
+        if found > top_n:
+            break
+    return jsonify(found_keywords)
+
+@app.route('/keywords/ping')
+def get_ping():
+    return jsonify({"message": "pong"})
+
 
 @app.route('/')
 def home():
     return send_from_directory('.', "index.html")
 
-def prepare_server(model_path, index_path):
+def prepare_server(model_path):
     global model
     global app
-    global ix
-    ix = load_index(index_path)
+    global all_keywords
     model = fasttext.load_model(model_path)
+    all_keywords = model.labels
     return app
 
