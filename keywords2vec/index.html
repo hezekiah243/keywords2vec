@@ -35,14 +35,7 @@
                   (term, index) => {
                     return <option
                       value={term} key={"sug-" + index}
-                      onClick={(ev) => {
-                        setTimeout(
-                          () => {
-                            selectElement(ev.target.value)
-                          },
-                          1
-                        )
-                      }
+                      onClick={(ev) => {selectElement(ev.target.value)}}
 
                     >{term}</option>
                   }
@@ -59,7 +52,7 @@
           super(props)
           this.props = props
           this.suggestionTimeout = null;
-          this.cancel_source = null;
+					this.cancel_source = null;
           this.state = {
             suggestions: [],
             term: "",
@@ -72,28 +65,28 @@
           if(term && term.length >= 2){
             clearTimeout(this.suggestionTimeout);
             if(this.cancel_source){
-              this.cancel_source.cancel();
+            	this.cancel_source.cancel();
             }
             const CancelToken = axios.CancelToken;
-            this.cancel_source = CancelToken.source();
+						this.cancel_source = CancelToken.source();
             this.suggestionTimeout = setTimeout(
               () => {
-                this.setState(
+              	this.setState(
                   {
                     suggestions: ["Loading...",],
                     showSuggestions: true
                   }
                 )
-                axios.get("/keywords/autocomplete?k="+term, {cancelToken: this.cancel_source.token}).then(
-                  (resp) => {
-                    this.setState(
-                      {
-                        suggestions: resp.data,
-                        showSuggestions: true
-                      }
-                    )
-                  }
-                )
+              	axios.get("/keywords/autocomplete?k="+term, {cancelToken: this.cancel_source.token}).then(
+              		(resp) => {
+              			this.setState(
+		                  {
+		                    suggestions: resp.data,
+		                    showSuggestions: true
+		                  }
+		                )
+              		}
+              	)
                 
               }, 300
             );
@@ -114,8 +107,8 @@
                     showSuggestions: false
                   })
                   setTimeout(
-                    () => {this.updateSuggestion()},
-                    1
+                  	() => {this.updateSuggestion()},
+                  	1
                   )
                 }}
               />
