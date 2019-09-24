@@ -4,3 +4,4 @@ fastprogress
 git+git://github.com/facebookresearch/fastText.git
 tornado
 flask-cors
+annoy

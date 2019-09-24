@@ -122,7 +122,7 @@
                       showSuggestions: false,
                       term: newtermSplit.join(", ")
                     })
-                    this.props.updateValue(this.state.term)
+                    this.props.updateValue(newtermSplit.join(", "))
                   }
                 }/>
               }
@@ -136,28 +136,24 @@
           // Pass props to parent class
           super(props)
           this.props = props
-          this.state = {
-            positive: "",
-            size: 50
-
-          }
+          this.state = {}
         }
         componentDidMount(){
           
         }
         render () {
           return <div className="section">
-            <h1>Explore the word2vec vectors</h1>
+            <h1>Explore Epistemonikos keywords</h1>
             <div className="field">
               <div className="control">
                 <span>Keywords.</span>
                 <span style={{color: "#CCC", fontSize: "0.8em", marginLeft: "5px"}}>Example: heart failure</span>
-                <KeywordInput suggestTerms={this.props.suggestTerms} updateValue={(v) => {this.setState({positive: v})}} />
+                <KeywordInput suggestTerms={this.props.suggestTerms} updateValue={(v) => {this.props.updateTerm({term: v})}} />
               </div>
             </div>
             <div className="error-messages"></div>
             <div><a className={"button keywords-btn" + (this.props.isLoading ? " is-loading":"")} onClick={() => {
-              this.props.search(this.state.positive, this.state.size)
+              this.props.search()
             }}>Get keywords</a></div>
           </div>
         }
@@ -200,19 +196,19 @@
           super(props);
           // Set initial state
           this.state = {
-            positive: "",
+            term: "",
             similars: [],
-            size: 200,
+            size: 50,
             isLoading: false 
           }
         }
         componentDidMount(){
         }
-        search(positive, size){
+        search(){
           // Update data
           var targetUrl = "./keywords/similars?"
-          targetUrl += "k=" + positive
-          targetUrl += "&size=" + size
+          targetUrl += "k=" + this.state.term
+          targetUrl += "&size=" + this.state.size
 
           this.setState({isLoading: true})
           axios.get(targetUrl)
@@ -224,11 +220,14 @@
         suggestTerms(term){
           return findTerms(this.state.keywords, term)
         }
+        updateTerm(data){
+          this.setState({term: data.term});
+        }
         render(){
           // Render JSX
           return (
             <div>
-              <SearchForm search={this.search.bind(this)} suggestTerms={this.suggestTerms.bind(this)} isLoading={this.state.isLoading}/>
+              <SearchForm search={this.search.bind(this)} updateTerm={this.updateTerm.bind(this)} suggestTerms={this.suggestTerms.bind(this)} isLoading={this.state.isLoading}/>
               <SimilarsComp similars={this.state.similars}/>
             </div>
           );
