@@ -97,7 +97,7 @@ def main():
         return
 
     if args.subcommand == "serve":
-        app = prepare_server()
+        app = prepare_server(args.tree_directory)
         http_server = HTTPServer(WSGIContainer(app))
         http_server.listen(5000)
         IOLoop.instance().start()

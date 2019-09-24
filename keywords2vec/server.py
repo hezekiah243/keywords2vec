@@ -1,4 +1,5 @@
 import sys
+import os
 
 from collections import defaultdict
 
@@ -78,24 +79,24 @@ def get_ping():
 def home():
     return send_from_directory('.', "index.html")
 
-def load_trees():
-    dim = int(open("tree_dim.txt").read())
+def load_trees(tree_directory):
+    dim = int(open(os.path.join(tree_directory, "tree_dim.txt")).read())
     tree = AnnoyIndex(dim, 'angular')
-    tree.load('tree.ann')
-    labels = [label.rstrip("\r\n") for label in open("tree_labels.txt").readlines()]
+    tree.load(os.path.join(tree_directory, 'tree.ann'))
+    labels = [label.rstrip("\r\n") for label in open(os.path.join(tree_directory, "tree_labels.txt")).readlines()]
     all_keywords_index = {}
     for i, label in enumerate(labels):
         all_keywords_index[label] = i
     return dim, tree, labels, all_keywords_index
 
 
-def prepare_server():
+def prepare_server(tree_directory):
     global tree
     global app
     global dim
     global all_keywords
     global all_keywords_index
-    dim, tree, all_keywords, all_keywords_index = load_trees()
+    dim, tree, all_keywords, all_keywords_index = load_trees(tree_directory)
 
     return app
 
