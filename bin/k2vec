@@ -85,9 +85,9 @@ def main():
 
     parser_serve = subparsers.add_parser('serve', help='serve a trained model')
     parser_serve.add_argument(
-        "--model-path", dest="model_path",
+        "--tree-directory", dest="tree_directory",
         required=True,
-        help="The path to the model"
+        help="The path to the directory where the tree.ann file is"
     )
 
     try:
@@ -97,7 +97,7 @@ def main():
         return
 
     if args.subcommand == "serve":
-        app = prepare_server(args.model_path)
+        app = prepare_server()
         http_server = HTTPServer(WSGIContainer(app))
         http_server.listen(5000)
         IOLoop.instance().start()

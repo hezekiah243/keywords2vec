@@ -5,16 +5,20 @@ from collections import defaultdict
 import fasttext
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+from annoy import AnnoyIndex
 
 
-model = None
+tree = None
+dim = None
+all_keywords = []
+all_keywords_index = {}
+
 
 app = Flask(__name__)
 CORS(app)
 x_suggestions_per_keyword = 100
 x_max_suggestions = 500
 
-all_keywords = []
 
 def prepare_input_keywords():
     raw_keywords = (request.args.get('k') or "").split(",")
@@ -35,8 +39,10 @@ def get_suggestion():
     all_suggestions = defaultdict(lambda: defaultdict(float))
     keywords = prepare_input_keywords()
     for keyword in keywords:
-        if keyword in model:
-            for (score, suggestion) in model.get_nearest_neighbors(keyword, x_suggestions_per_keyword):
+        if keyword in all_keywords:
+            for suggestion_index, score_0 in zip(*tree.get_nns_by_item(all_keywords_index[keyword], x_suggestions_per_keyword, include_distances=True)):
+                suggestion = all_keywords[suggestion_index]
+                score = 1 - score_0
                 if suggestion not in keywords:
                     all_suggestions[suggestion]["max"] = max(score, all_suggestions[suggestion]["max"])
                     all_suggestions[suggestion]["sum"] += score
@@ -49,7 +55,7 @@ def get_suggestion():
 
 
 @app.route('/keywords/autocomplete')
-def get_keywords_autocomplete2():
+def get_keywords_autocomplete():
     top_n = 25
     keyword = prepare_input_keywords()[0]
     found = 0
@@ -72,11 +78,24 @@ def get_ping():
 def home():
     return send_from_directory('.', "index.html")
 
-def prepare_server(model_path):
-    global model
+def load_trees():
+    dim = int(open("tree_dim.txt").read())
+    tree = AnnoyIndex(dim, 'angular')
+    tree.load('tree.ann')
+    labels = [label.rstrip("\r\n") for label in open("tree_labels.txt").readlines()]
+    all_keywords_index = {}
+    for i, label in enumerate(labels):
+        all_keywords_index[label] = i
+    return dim, tree, labels, all_keywords_index
+
+
+def prepare_server():
+    global tree
     global app
+    global dim
     global all_keywords
-    model = fasttext.load_model(model_path)
-    all_keywords = model.labels
+    global all_keywords_index
+    dim, tree, all_keywords, all_keywords_index = load_trees()
+
     return app
 
